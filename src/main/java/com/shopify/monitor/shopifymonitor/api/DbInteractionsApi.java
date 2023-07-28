@@ -1,9 +1,8 @@
 package com.shopify.monitor.shopifymonitor.api;
 
-import com.shopify.monitor.shopifymonitor.model.Product;
-import com.shopify.monitor.shopifymonitor.model.ShopifyStoreInventory;
+import com.shopify.monitor.shopifymonitor.persistance.model.Product;
+import com.shopify.monitor.shopifymonitor.persistance.model.ShopifyStoreInventory;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,11 +10,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@Profile("local")
 @Slf4j
 @RestController
 @RequestMapping(value = "/shopify/notification")
 public class DbInteractionsApi {
+
+//    @Autowired
+//    private
     //TODO: make delete, update
 
     @GetMapping(value = "/products")

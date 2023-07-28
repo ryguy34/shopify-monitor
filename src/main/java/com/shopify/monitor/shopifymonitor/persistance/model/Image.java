@@ -1,4 +1,4 @@
-package com.shopify.monitor.shopifymonitor.model;
+package com.shopify.monitor.shopifymonitor.persistance.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;

@@ -1,14 +1,18 @@
-package com.shopify.monitor.shopifymonitor.model;
+package com.shopify.monitor.shopifymonitor.persistance.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.ToString;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
 
 @Data
 @ToString
+@Document("product")
 public class Product {
+    @Id
     private String id;
     private String title;
     private String handle;
@@ -24,7 +28,7 @@ public class Product {
     @JsonProperty("product_type")
     private String productType;
     private List<String> tags;
-    private List<Variants> variants;
+    private List<Variant> variants;
     private List<Image> images;
     private List<Option> options;
 }
