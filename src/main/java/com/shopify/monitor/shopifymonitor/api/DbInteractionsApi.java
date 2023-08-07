@@ -23,7 +23,7 @@ public class DbInteractionsApi {
     @GetMapping(value = "/products")
     public ResponseEntity<ShopifyStoreInventory> getAllProducts() {
         ShopifyStoreInventory products = null;
-        retrieveProducts.retrieveProducts("undefeated");
+        products = retrieveProducts.retrieveProducts();
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
