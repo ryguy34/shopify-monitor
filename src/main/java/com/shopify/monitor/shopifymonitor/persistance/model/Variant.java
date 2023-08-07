@@ -22,8 +22,8 @@ public class Variant {
     @JsonProperty("requires_shipping")
     private Boolean requiresShipping;
     private Boolean taxable;
-    @JsonProperty("featured_image")
-    private String featuredImage;
+//    @JsonProperty("featured_image")
+//    private String featuredImage;
     private Boolean available;
     private String price;
     private Long grams;
