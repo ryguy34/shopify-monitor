@@ -1,4 +1,4 @@
-package com.shopify.monitor.shopifymonitor.model;
+package com.shopify.monitor.shopifymonitor.persistance.model;
 
 import lombok.Data;
 import lombok.ToString;
