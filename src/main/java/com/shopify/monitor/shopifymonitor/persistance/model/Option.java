@@ -1,5 +1,6 @@
 package com.shopify.monitor.shopifymonitor.persistance.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.ToString;
 
@@ -7,8 +8,9 @@ import java.util.List;
 
 @Data
 @ToString
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Option {
     private String name;
-    private Integer position;
+    private Long position;
     private List<String> values;
 }

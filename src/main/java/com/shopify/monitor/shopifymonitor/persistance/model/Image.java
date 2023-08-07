@@ -1,5 +1,6 @@
 package com.shopify.monitor.shopifymonitor.persistance.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.ToString;
@@ -8,18 +9,19 @@ import java.util.List;
 
 @Data
 @ToString
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Image {
     private String id;
     @JsonProperty("created_at")
     private String createdAt;
-    private Integer position;
+    private Long position;
     @JsonProperty("updated_at")
     private String updatedAt;
     @JsonProperty("product_id")
-    private Integer productId;
+    private Long productId;
     @JsonProperty("variant_ids")
     private List<String> variantIds;
     private String src;
-    private Integer width;
-    private Integer height;
+    private Long width;
+    private Long height;
 }

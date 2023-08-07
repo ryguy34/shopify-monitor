@@ -2,7 +2,9 @@ package com.shopify.monitor.shopifymonitor.api;
 
 import com.shopify.monitor.shopifymonitor.persistance.model.Product;
 import com.shopify.monitor.shopifymonitor.persistance.model.ShopifyStoreInventory;
+import com.shopify.monitor.shopifymonitor.service.RetrieveProducts;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,13 +17,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/shopify/notification")
 public class DbInteractionsApi {
 
-//    @Autowired
-//    private
-    //TODO: make delete, update
+    @Autowired
+    private RetrieveProducts retrieveProducts;
 
     @GetMapping(value = "/products")
     public ResponseEntity<ShopifyStoreInventory> getAllProducts() {
         ShopifyStoreInventory products = null;
+        retrieveProducts.retrieveProducts("undefeated");
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
