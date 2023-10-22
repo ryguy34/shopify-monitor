@@ -1,4 +1,4 @@
-package com.shopify.monitor.shopifymonitor.persistance.model;
+package com.shopify.monitor.shopifymonitor.api.vo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 @ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Image {
+public class ImageVO {
     private String id;
     @JsonProperty("created_at")
     private String createdAt;

@@ -1,4 +1,4 @@
-package com.shopify.monitor.shopifymonitor.persistance.model;
+package com.shopify.monitor.shopifymonitor.api.vo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
@@ -9,6 +9,7 @@ import java.util.List;
 @Data
 @ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ShopifyStoreInventory {
-    private List<Product> products;
+public class ShopifyStoreInventoryVO {
+    private String storeName;
+    private List<ProductVO> products;
 }
