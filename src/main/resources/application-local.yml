@@ -6,7 +6,7 @@ spring:
 
 logging:
     level:
-        com.shopify.monitor.shopifymonitor: DEBUG
+        com.shopify.monitor.shopifymonitor: INFO
 
 
 shopify:

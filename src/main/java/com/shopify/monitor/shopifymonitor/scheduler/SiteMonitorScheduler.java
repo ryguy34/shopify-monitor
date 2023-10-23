@@ -81,6 +81,7 @@ public class SiteMonitorScheduler {
                 // is the product completely new
                 Optional<Product> product = productRepository.findById(productId);
                 if (product.isEmpty()) {
+                    log.info("*** New product found: {} ***", p.getTitle());
                     Product mappedProduct = shopifyProductMapper.mapProduct(p, siteName);
                     productRepository.save(mappedProduct);
 
@@ -88,12 +89,12 @@ public class SiteMonitorScheduler {
                     variantRepository.saveAll(newProductVariants);
 
                     // TODO: send discord notification
+                } else {
+                    List<VariantVO> currentStoreVariants = p.getVariants();
+                    List<Variant> savedProductVariants = variantRepository.findAllByProductId(productId);
+
+                    updateDbAndSendNotification(currentStoreVariants, savedProductVariants);
                 }
-
-                List<VariantVO> currentStoreVariants = p.getVariants();
-                List<Variant> savedProductVariants = variantRepository.findAllByProductId(productId);
-
-                updateDbAndSendNotification(currentStoreVariants, savedProductVariants);
             }
         }
     }
@@ -104,6 +105,7 @@ public class SiteMonitorScheduler {
                 if (currentStoreVariant.getId().equals(savedVariant.getId())) {
                     if (Boolean.TRUE.equals(currentStoreVariant.getAvailable()) && Boolean.FALSE.equals(savedVariant.getAvailable())) {
                         // restocked
+                        log.info("*** Restocked item: {} ***", savedVariant.getTitle());
                         savedVariant.setAvailable(true);
                         savedVariant.setUpdatedAt(currentStoreVariant.getUpdatedAt());
                         variantRepository.save(savedVariant);
@@ -111,6 +113,7 @@ public class SiteMonitorScheduler {
                         // TODO: send discord notification
                     } else if (Boolean.FALSE.equals(currentStoreVariant.getAvailable()) && Boolean.TRUE.equals(savedVariant.getAvailable())) {
                         // out of stock
+                        log.info("*** OOS: {} ***", savedVariant.getTitle());
                         savedVariant.setAvailable(false);
                         savedVariant.setUpdatedAt(currentStoreVariant.getUpdatedAt());
                         variantRepository.save(savedVariant);

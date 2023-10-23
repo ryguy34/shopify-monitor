@@ -14,6 +14,7 @@ public interface ShopifyProductMapper {
 
     @Mapping(target = "siteName", source = "siteName")
     Product mapProduct(ProductVO product, String siteName);
+
     List<Product> map(List<ProductVO> products, @Context String siteName);
 
     default Product mapContext(ProductVO productVO, @Context String siteName) {
