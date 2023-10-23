@@ -4,7 +4,7 @@ import com.shopify.monitor.shopifymonitor.api.vo.ProductVO;
 import com.shopify.monitor.shopifymonitor.api.vo.ShopifyStoreInventoryVO;
 import com.shopify.monitor.shopifymonitor.api.vo.VariantVO;
 import com.shopify.monitor.shopifymonitor.mappings.ShopifyProductMapper;
-import com.shopify.monitor.shopifymonitor.mappings.VariantMapper;
+import com.shopify.monitor.shopifymonitor.mappings.ShopifyVariantMapper;
 import com.shopify.monitor.shopifymonitor.persistance.model.Product;
 import com.shopify.monitor.shopifymonitor.persistance.model.Variant;
 import com.shopify.monitor.shopifymonitor.persistance.repository.ProductRepository;
@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -30,7 +31,7 @@ public class SiteMonitorScheduler {
     private ShopifyProductMapper shopifyProductMapper;
 
     @Autowired
-    private VariantMapper variantMapper;
+    private ShopifyVariantMapper shopifyVariantMapper;
 
     @Autowired
     private ProductRepository productRepository;
@@ -49,13 +50,13 @@ public class SiteMonitorScheduler {
     // TODO: make this method a cron job
     public void monitorSite() {
         String siteUrl = String.valueOf(siteUrls.getUrls().get(0));
+        String siteName = shopifyUtility.stripSiteName(siteUrl);
         ShopifyStoreInventoryVO storeInventory = retrieveProducts.retrieveProducts(siteUrl);
         log.info("First Run: {}", isFirstRun);
 
         if (isFirstRun) {
             // save all products
             List<VariantVO> variantVOList = new ArrayList<>();
-            String siteName = shopifyUtility.stripSiteName(siteUrl);
             log.debug("Site: {}", siteName);
 
             List<Product> products = shopifyProductMapper.map(storeInventory.getProducts(), siteName);
@@ -65,7 +66,7 @@ public class SiteMonitorScheduler {
                 variantVOList.addAll(product.getVariants());
             }
 
-            List<Variant> variants = variantMapper.map(variantVOList);
+            List<Variant> variants = shopifyVariantMapper.map(variantVOList);
             log.debug("Mapped db variants: size {} {}", variants.size(), variants);
 
             productRepository.saveAll(products);
@@ -73,8 +74,49 @@ public class SiteMonitorScheduler {
 
             isFirstRun = false;
         } else {
+            // get store inventory variants and get all db variants for that store
+            for (ProductVO p : storeInventory.getProducts()) {
+                String productId = p.getId();
 
-            // TODO: not first run so check for updates
+                // is the product completely new
+                Optional<Product> product = productRepository.findById(productId);
+                if (product.isEmpty()) {
+                    Product mappedProduct = shopifyProductMapper.mapProduct(p, siteName);
+                    productRepository.save(mappedProduct);
+
+                    List<Variant> newProductVariants = shopifyVariantMapper.map(p.getVariants());
+                    variantRepository.saveAll(newProductVariants);
+
+                    // TODO: send discord notification
+                }
+
+                List<VariantVO> currentStoreVariants = p.getVariants();
+                List<Variant> savedProductVariants = variantRepository.findAllByProductId(productId);
+
+                updateDbAndSendNotification(currentStoreVariants, savedProductVariants);
+            }
+        }
+    }
+
+    private void updateDbAndSendNotification(List<VariantVO> currentStoreVariants, List<Variant> savedProductVariants) {
+        for (final VariantVO currentStoreVariant : currentStoreVariants) {
+            for (Variant savedVariant : savedProductVariants) {
+                if (currentStoreVariant.getId().equals(savedVariant.getId())) {
+                    if (Boolean.TRUE.equals(currentStoreVariant.getAvailable()) && Boolean.FALSE.equals(savedVariant.getAvailable())) {
+                        // restocked
+                        savedVariant.setAvailable(true);
+                        savedVariant.setUpdatedAt(currentStoreVariant.getUpdatedAt());
+                        variantRepository.save(savedVariant);
+
+                        // TODO: send discord notification
+                    } else if (Boolean.FALSE.equals(currentStoreVariant.getAvailable()) && Boolean.TRUE.equals(savedVariant.getAvailable())) {
+                        // out of stock
+                        savedVariant.setAvailable(false);
+                        savedVariant.setUpdatedAt(currentStoreVariant.getUpdatedAt());
+                        variantRepository.save(savedVariant);
+                    }
+                }
+            }
         }
     }
 }

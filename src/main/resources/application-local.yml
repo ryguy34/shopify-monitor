@@ -1,8 +1,8 @@
 spring:
     data:
         mongodb:
-            uri: mongodb://localhost:27017
-            database: shopify
+            uri: ${MONGO_URI}
+            database: ${DB}
 
 logging:
     level:

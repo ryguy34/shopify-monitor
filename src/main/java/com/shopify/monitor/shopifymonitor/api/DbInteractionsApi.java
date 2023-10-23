@@ -36,7 +36,7 @@ public class DbInteractionsApi {
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
-    @GetMapping(value = "/process")
+    @PostMapping(value = "/process")
     public ResponseEntity<HttpStatus> processInventory() {
         siteMonitorScheduler.monitorSite();
         return new ResponseEntity<>(HttpStatus.OK);
