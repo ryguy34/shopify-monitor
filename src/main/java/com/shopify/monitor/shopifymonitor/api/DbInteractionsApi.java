@@ -30,10 +30,16 @@ public class DbInteractionsApi {
     private ProductRepository productRepository;
 
     @GetMapping(value = "/products")
-    public ResponseEntity<ShopifyStoreInventoryVO> getAllProducts() {
-        ShopifyStoreInventoryVO products = retrieveProducts.retrieveProducts("");
-        siteMonitorScheduler.monitorSite(products);
+    public ResponseEntity<ShopifyStoreInventoryVO> getAllProducts(@RequestParam String siteName) {
+        siteName = "https://" + siteName + ".com";
+        ShopifyStoreInventoryVO products = retrieveProducts.retrieveProducts(siteName);
         return new ResponseEntity<>(products, HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/process")
+    public ResponseEntity<HttpStatus> processInventory() {
+        siteMonitorScheduler.monitorSite();
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @GetMapping(value = "/findproduct")

@@ -17,9 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Component
@@ -49,23 +47,26 @@ public class SiteMonitorScheduler {
     private boolean isFirstRun = true;
 
     // TODO: make this method a cron job
-    public void monitorSite(ShopifyStoreInventoryVO storeInventory) {
+    public void monitorSite() {
+        String siteUrl = String.valueOf(siteUrls.getUrls().get(0));
+        ShopifyStoreInventoryVO storeInventory = retrieveProducts.retrieveProducts(siteUrl);
+        log.info("First Run: {}", isFirstRun);
 
         if (isFirstRun) {
             // save all products
             List<VariantVO> variantVOList = new ArrayList<>();
-            String siteUrl = shopifyUtility.stripSiteName(String.valueOf(siteUrls.getUrls().get(0)));
-            log.debug("Site: {}", siteUrl);
+            String siteName = shopifyUtility.stripSiteName(siteUrl);
+            log.debug("Site: {}", siteName);
 
-            List<Product> products = shopifyProductMapper.map(storeInventory.getProducts(), siteUrl);
+            List<Product> products = shopifyProductMapper.map(storeInventory.getProducts(), siteName);
             log.debug("Mapped db products: {}", products);
 
-            for(ProductVO product: storeInventory.getProducts()) {
+            for (ProductVO product : storeInventory.getProducts()) {
                 variantVOList.addAll(product.getVariants());
             }
 
             List<Variant> variants = variantMapper.map(variantVOList);
-            log.debug("Mapped db variants: size {} {}",variants.size(), variants);
+            log.debug("Mapped db variants: size {} {}", variants.size(), variants);
 
             productRepository.saveAll(products);
             variantRepository.saveAll(variants);
