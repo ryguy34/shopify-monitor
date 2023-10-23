@@ -1,9 +1,7 @@
 package com.shopify.monitor.shopifymonitor.persistance.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.shopify.monitor.shopifymonitor.api.vo.ImageVO;
-import com.shopify.monitor.shopifymonitor.api.vo.OptionVO;
+import com.shopify.monitor.shopifymonitor.api.vo.Image;
+import com.shopify.monitor.shopifymonitor.api.vo.Option;
 import lombok.Data;
 import lombok.ToString;
 import org.springframework.data.annotation.Id;
@@ -13,26 +11,19 @@ import java.util.List;
 
 @Data
 @ToString
-@JsonIgnoreProperties(ignoreUnknown = true)
 @Document("product")
 public class Product {
     @Id
     private String id;
+    private String siteName;
     private String title;
     private String handle;
-    @JsonProperty("body_html")
-    private String bodyHtml;
-    @JsonProperty("published_at")
     private String publishedAt;
-    @JsonProperty("created_at")
     private String createdAt;
-    @JsonProperty("updated_at")
     private String updatedAt;
     private String vendor;
-    @JsonProperty("product_type")
     private String productType;
     private List<String> tags;
-    private List<Variant> variants;
-    private List<ImageVO> imageVOS;
-    private List<OptionVO> optionVOS;
+    private List<Image> images;
+    private List<Option> options;
 }

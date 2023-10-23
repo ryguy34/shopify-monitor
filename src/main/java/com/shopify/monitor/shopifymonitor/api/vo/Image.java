@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 @ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ImageVO {
+public class Image {
     private String id;
     @JsonProperty("created_at")
     private String createdAt;

@@ -27,6 +27,6 @@ public class ProductVO {
     private String productType;
     private List<String> tags;
     private List<VariantVO> variants;
-    private List<ImageVO> imageVOS;
-    private List<OptionVO> optionVOS;
+    private List<Image> images;
+    private List<Option> options;
 }

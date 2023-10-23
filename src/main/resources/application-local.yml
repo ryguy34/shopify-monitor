@@ -13,6 +13,10 @@ shopify:
     site-url:
         undefeated: "https://undefeated.com"
 
+site:
+    urls:
+        - https://undefeated.com
+
 #shopify:
 #    undefeated:
 #        url: "https://undefeated.com"

@@ -2,7 +2,6 @@ package com.shopify.monitor.shopifymonitor.service;
 
 import com.shopify.monitor.shopifymonitor.api.vo.ShopifyStoreInventoryVO;
 import com.shopify.monitor.shopifymonitor.feignclient.ShopifyProductsFeignClient;
-import com.shopify.monitor.shopifymonitor.persistance.model.ShopifyStoreInventory;
 import com.shopify.monitor.shopifymonitor.persistance.repository.ProductRepository;
 import com.shopify.monitor.shopifymonitor.persistance.repository.VariantRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -48,10 +47,6 @@ public class RetrieveProducts {
 //        } while (i == 1 || !additionalPages.getBody().getProducts().isEmpty());
         storeInventory = productsFeignClient.getProducts(1, 1);
         storeInventory.getBody().setStoreName(siteUrl);
-//        productRepository.saveAll(storeInventory.getBody().getProducts());
-//        for (final Product p: storeInventory.getBody().getProducts()) {
-//            variantRepository.saveAll(p.getVariants());
-//        }
 
 
         log.debug("Store Inventory: {}", storeInventory);

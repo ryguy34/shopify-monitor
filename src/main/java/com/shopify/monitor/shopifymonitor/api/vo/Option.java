@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 @ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class OptionVO {
+public class Option {
     private String name;
     private Long position;
     private List<String> values;

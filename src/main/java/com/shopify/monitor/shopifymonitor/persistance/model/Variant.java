@@ -1,6 +1,5 @@
 package com.shopify.monitor.shopifymonitor.persistance.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.ToString;
@@ -9,7 +8,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
 @ToString
-@JsonIgnoreProperties(ignoreUnknown = true)
 @Document("variant")
 public class Variant {
     @Id
@@ -22,8 +20,6 @@ public class Variant {
     @JsonProperty("requires_shipping")
     private Boolean requiresShipping;
     private Boolean taxable;
-//    @JsonProperty("featured_image")
-//    private String featuredImage;
     private Boolean available;
     private String price;
     private Long grams;
@@ -31,7 +27,7 @@ public class Variant {
     private String compareAtPrice;
     private Long position;
     @JsonProperty("product_id")
-    private Long productId;
+    private String productId;
     @JsonProperty("created_at")
     private String createdAt;
     @JsonProperty("updated_at")
