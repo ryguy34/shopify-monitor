@@ -86,7 +86,7 @@ public class SiteMonitorScheduler {
                 Optional<Product> product = productRepository.findById(productId);
                 if (product.isEmpty()) {
                     // is the product completely new
-                    log.debug("*** New product found: {} ***", p.getTitle());
+                    log.info("*** New product found: {} ***", p.getTitle());
                     Product mappedProduct = shopifyProductMapper.mapProduct(p, siteName);
                     productRepository.save(mappedProduct);
 
@@ -115,7 +115,7 @@ public class SiteMonitorScheduler {
                 if (currentStoreVariant.getId().equals(savedVariant.getId())) {
                     if (Boolean.TRUE.equals(currentStoreVariant.getAvailable()) && Boolean.FALSE.equals(savedVariant.getAvailable())) {
                         // restocked
-                        log.debug("*** Restocked item: {} ***", savedVariant.getTitle());
+                        log.info("*** Restocked item: {} ***", savedVariant.getTitle());
                         savedVariant.setAvailable(true);
                         savedVariant.setUpdatedAt(currentStoreVariant.getUpdatedAt());
                         savedVariant = shopifyUtility.cleanVariantData(savedVariant);
@@ -124,7 +124,7 @@ public class SiteMonitorScheduler {
                         // TODO: send discord notification
                     } else if (Boolean.FALSE.equals(currentStoreVariant.getAvailable()) && Boolean.TRUE.equals(savedVariant.getAvailable())) {
                         // out of stock
-                        log.debug("*** OOS: {} ***", savedVariant.getTitle());
+                        log.info("*** OOS: {} ***", savedVariant.getTitle());
                         savedVariant.setAvailable(false);
                         savedVariant.setUpdatedAt(currentStoreVariant.getUpdatedAt());
                         variantRepository.save(savedVariant);
