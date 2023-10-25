@@ -14,7 +14,9 @@ import com.shopify.monitor.shopifymonitor.utility.ShopifyUtility;
 import com.shopify.monitor.shopifymonitor.utility.SiteUrls;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StopWatch;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,8 +49,10 @@ public class SiteMonitorScheduler {
 
     private boolean isFirstRun = true;
 
-    // TODO: make this method a cron job
+    @Scheduled(fixedDelay = 60000)
     public void monitorSite() {
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
         String siteUrl = String.valueOf(siteUrls.getUrls().get(0));
         String siteName = shopifyUtility.stripSiteName(siteUrl);
         ShopifyStoreInventoryVO storeInventory = retrieveProducts.retrieveProducts(siteUrl);
@@ -81,7 +85,7 @@ public class SiteMonitorScheduler {
                 // is the product completely new
                 Optional<Product> product = productRepository.findById(productId);
                 if (product.isEmpty()) {
-                    log.info("*** New product found: {} ***", p.getTitle());
+                    log.debug("*** New product found: {} ***", p.getTitle());
                     Product mappedProduct = shopifyProductMapper.mapProduct(p, siteName);
                     productRepository.save(mappedProduct);
 
@@ -97,6 +101,10 @@ public class SiteMonitorScheduler {
                 }
             }
         }
+
+        stopWatch.stop();
+        log.info("Processing time: {} seconds", stopWatch.getTotalTimeSeconds());
+        log.info("Monitor done");
     }
 
     private void updateDbAndSendNotification(List<VariantVO> currentStoreVariants, List<Variant> savedProductVariants) {
