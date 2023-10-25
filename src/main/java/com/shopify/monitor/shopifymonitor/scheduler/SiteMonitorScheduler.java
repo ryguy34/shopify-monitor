@@ -56,9 +56,10 @@ public class SiteMonitorScheduler {
         String siteUrl = String.valueOf(siteUrls.getUrls().get(0));
         String siteName = shopifyUtility.stripSiteName(siteUrl);
         ShopifyStoreInventoryVO storeInventory = retrieveProducts.retrieveProducts(siteUrl);
-        log.info("First Run: {}", isFirstRun);
+        long count = productRepository.count();
+        log.info("Count {} First Run: {}", count, isFirstRun);
 
-        if (isFirstRun) {
+        if (count == 0 || isFirstRun) {
             // save all products and variants
             List<VariantVO> variantVOList = new ArrayList<>();
             log.debug("Site: {}", siteName);

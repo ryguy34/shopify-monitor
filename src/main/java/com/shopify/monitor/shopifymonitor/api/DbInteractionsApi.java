@@ -2,6 +2,7 @@ package com.shopify.monitor.shopifymonitor.api;
 
 import com.shopify.monitor.shopifymonitor.api.vo.ShopifyStoreInventoryVO;
 import com.shopify.monitor.shopifymonitor.persistance.model.Product;
+import com.shopify.monitor.shopifymonitor.persistance.model.Variant;
 import com.shopify.monitor.shopifymonitor.persistance.repository.ProductRepository;
 import com.shopify.monitor.shopifymonitor.persistance.repository.VariantRepository;
 import com.shopify.monitor.shopifymonitor.scheduler.SiteMonitorScheduler;
@@ -11,6 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -44,10 +48,33 @@ public class DbInteractionsApi {
 
     @GetMapping(value = "/findproduct")
     public ResponseEntity<Product> getProduct(@RequestParam String id) {
-        Product product = null;
         log.info("Product id: {}", id);
 
-        return new ResponseEntity<>(product, HttpStatus.OK);
+        Optional<Product> product = productRepository.findById(id);
+        return product.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    @GetMapping(value = "/findvariant")
+    public ResponseEntity<Variant> getVariant(@RequestParam String id) {
+        log.info("Variant id: {}", id);
+
+        Optional<Variant> variant = variantRepository.findById(id);
+        return variant.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    @GetMapping(value = "/findvariantsbyproductid")
+    public ResponseEntity<List<Variant>> getVariantsByProductId(@RequestParam String id) {
+        log.info("Product id: {}", id);
+
+        Optional<Product> product = productRepository.findById(id);
+        if (product.isPresent()) {
+            List<Variant> variants = variantRepository.findAllByProductId(product.get().getId());
+            return new ResponseEntity<>(variants, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     @PostMapping(value = "/deleteallproducts")
