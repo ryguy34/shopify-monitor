@@ -59,7 +59,7 @@ public class SiteMonitorScheduler {
         log.info("First Run: {}", isFirstRun);
 
         if (isFirstRun) {
-            // save all products
+            // save all products and variants
             List<VariantVO> variantVOList = new ArrayList<>();
             log.debug("Site: {}", siteName);
 
@@ -71,6 +71,7 @@ public class SiteMonitorScheduler {
             }
 
             List<Variant> variants = shopifyVariantMapper.map(variantVOList);
+            variants = shopifyUtility.cleanVariantData(variants);
             log.debug("Mapped db variants: size {} {}", variants.size(), variants);
 
             productRepository.saveAll(products);
@@ -82,14 +83,15 @@ public class SiteMonitorScheduler {
             for (ProductVO p : storeInventory.getProducts()) {
                 String productId = p.getId();
 
-                // is the product completely new
                 Optional<Product> product = productRepository.findById(productId);
                 if (product.isEmpty()) {
+                    // is the product completely new
                     log.debug("*** New product found: {} ***", p.getTitle());
                     Product mappedProduct = shopifyProductMapper.mapProduct(p, siteName);
                     productRepository.save(mappedProduct);
 
                     List<Variant> newProductVariants = shopifyVariantMapper.map(p.getVariants());
+                    newProductVariants = shopifyUtility.cleanVariantData(newProductVariants);
                     variantRepository.saveAll(newProductVariants);
 
                     // TODO: send discord notification
@@ -113,15 +115,16 @@ public class SiteMonitorScheduler {
                 if (currentStoreVariant.getId().equals(savedVariant.getId())) {
                     if (Boolean.TRUE.equals(currentStoreVariant.getAvailable()) && Boolean.FALSE.equals(savedVariant.getAvailable())) {
                         // restocked
-                        log.info("*** Restocked item: {} ***", savedVariant.getTitle());
+                        log.debug("*** Restocked item: {} ***", savedVariant.getTitle());
                         savedVariant.setAvailable(true);
                         savedVariant.setUpdatedAt(currentStoreVariant.getUpdatedAt());
+                        savedVariant = shopifyUtility.cleanVariantData(savedVariant);
                         variantRepository.save(savedVariant);
 
                         // TODO: send discord notification
                     } else if (Boolean.FALSE.equals(currentStoreVariant.getAvailable()) && Boolean.TRUE.equals(savedVariant.getAvailable())) {
                         // out of stock
-                        log.info("*** OOS: {} ***", savedVariant.getTitle());
+                        log.debug("*** OOS: {} ***", savedVariant.getTitle());
                         savedVariant.setAvailable(false);
                         savedVariant.setUpdatedAt(currentStoreVariant.getUpdatedAt());
                         variantRepository.save(savedVariant);

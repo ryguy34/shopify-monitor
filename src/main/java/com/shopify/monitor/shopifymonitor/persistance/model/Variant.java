@@ -13,9 +13,6 @@ public class Variant {
     @Id
     private String id;
     private String title;
-    private String option1;
-    private String option2;
-    private String option3;
     private String sku;
     @JsonProperty("requires_shipping")
     private Boolean requiresShipping;
