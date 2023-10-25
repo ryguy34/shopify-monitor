@@ -55,6 +55,7 @@ public class SiteMonitorScheduler {
         stopWatch.start();
         String siteUrl = String.valueOf(siteUrls.getUrls().get(0));
         String siteName = shopifyUtility.stripSiteName(siteUrl);
+        // TODO: catch response entity and handle 403 forbidden (aka password page)
         ShopifyStoreInventoryVO storeInventory = retrieveProducts.retrieveProducts(siteUrl);
         long count = productRepository.count();
         log.info("Count {} First Run: {}", count, isFirstRun);

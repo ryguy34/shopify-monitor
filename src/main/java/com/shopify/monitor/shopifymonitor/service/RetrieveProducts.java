@@ -21,6 +21,7 @@ public class RetrieveProducts {
     @Autowired
     private ShopifyUtility shopifyUtility;
 
+    // TODO: return a response entity
     public ShopifyStoreInventoryVO retrieveProducts(String siteUrl) {
         ResponseEntity<ShopifyStoreInventoryVO> storeInventory = null;
         ResponseEntity<ShopifyStoreInventoryVO> additionalPages = null;
@@ -39,8 +40,6 @@ public class RetrieveProducts {
                         .addAll(Objects.requireNonNull(additionalPages.getBody()).getProducts());
             }
         } while (i == 1 || !additionalPages.getBody().getProducts().isEmpty());
-
-        //storeInventory = productsFeignClient.getProducts(1, 1);
 
         if (storeInventory.getBody() != null) {
             storeInventory.getBody().setStoreName(shopifyUtility.stripSiteName(siteUrl));
