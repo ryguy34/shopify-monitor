@@ -2,11 +2,10 @@ package com.shopify.monitor.shopifymonitor.service;
 
 import com.shopify.monitor.shopifymonitor.api.vo.ShopifyStoreInventoryVO;
 import com.shopify.monitor.shopifymonitor.feignclient.ShopifyProductsFeignClient;
-import com.shopify.monitor.shopifymonitor.persistance.model.ShopifyStoreInventory;
-import com.shopify.monitor.shopifymonitor.persistance.repository.ProductRepository;
-import com.shopify.monitor.shopifymonitor.persistance.repository.VariantRepository;
+import com.shopify.monitor.shopifymonitor.utility.ShopifyUtility;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -20,42 +19,34 @@ public class RetrieveProducts {
     private ShopifyProductsFeignClient productsFeignClient;
 
     @Autowired
-    private DiscordService discordService;
-
-    @Autowired
-    private ProductRepository productRepository;
-
-    @Autowired
-    private VariantRepository variantRepository;
+    private ShopifyUtility shopifyUtility;
 
     public ShopifyStoreInventoryVO retrieveProducts(String siteUrl) {
         ResponseEntity<ShopifyStoreInventoryVO> storeInventory = null;
         ResponseEntity<ShopifyStoreInventoryVO> additionalPages = null;
         int i = 0;
 
-//        do {
-//            i++;
-//            if (i == 1) {   // first page
-//                storeInventory = productsFeignClient.getProducts(250, i);
-//                if (storeInventory.getStatusCode().equals(HttpStatus.FORBIDDEN)) {
-//                    discordService.sendPasswordPageNotification();
-//                }
-//            } else {
-//                additionalPages = productsFeignClient.getProducts(250, i);
-//                Objects.requireNonNull(storeInventory.getBody()).getProducts()
-//                        .addAll(Objects.requireNonNull(additionalPages.getBody()).getProducts());
-//            }
-//        } while (i == 1 || !additionalPages.getBody().getProducts().isEmpty());
-        storeInventory = productsFeignClient.getProducts(1, 1);
-        storeInventory.getBody().setStoreName(siteUrl);
-//        productRepository.saveAll(storeInventory.getBody().getProducts());
-//        for (final Product p: storeInventory.getBody().getProducts()) {
-//            variantRepository.saveAll(p.getVariants());
-//        }
+        do {
+            i++;
+            if (i == 1) {   // first page
+                storeInventory = productsFeignClient.getProducts(250, i);
+                if (storeInventory.getStatusCode().equals(HttpStatus.FORBIDDEN)) {
+                    //discordService.sendPasswordPageNotification();
+                }
+            } else {
+                additionalPages = productsFeignClient.getProducts(250, i);
+                Objects.requireNonNull(storeInventory.getBody()).getProducts()
+                        .addAll(Objects.requireNonNull(additionalPages.getBody()).getProducts());
+            }
+        } while (i == 1 || !additionalPages.getBody().getProducts().isEmpty());
 
+        //storeInventory = productsFeignClient.getProducts(1, 1);
 
-        log.debug("Store Inventory: {}", storeInventory);
-        log.info("Products size: {}", storeInventory.getBody().getProducts().size());
+        if (storeInventory.getBody() != null) {
+            storeInventory.getBody().setStoreName(shopifyUtility.stripSiteName(siteUrl));
+        }
+
+        log.debug("Products size: {}", storeInventory.getBody().getProducts().size());
 
         return storeInventory.getBody();
     }

@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+// TODO: fix this so the url can be passed in
 @FeignClient(value = "shopifyclient", url = "${shopify.site-url.undefeated}")
 public interface ShopifyProductsFeignClient {
 

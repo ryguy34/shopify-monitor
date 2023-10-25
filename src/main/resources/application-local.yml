@@ -1,17 +1,21 @@
 spring:
     data:
         mongodb:
-            uri: mongodb://localhost:27017
-            database: shopify
+            uri: ${MONGO_URI}
+            database: ${DB}
 
 logging:
     level:
-        com.shopify.monitor.shopifymonitor: DEBUG
+        com.shopify.monitor.shopifymonitor: INFO
 
 
 shopify:
     site-url:
         undefeated: "https://undefeated.com"
+
+site:
+    urls:
+        - https://undefeated.com
 
 #shopify:
 #    undefeated:

@@ -1,4 +1,4 @@
-package com.shopify.shopifyrestocknotifier.api;
+package com.shopify.monitor.shopifymonitor.api;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
