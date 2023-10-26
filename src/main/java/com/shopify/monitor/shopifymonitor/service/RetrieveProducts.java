@@ -22,7 +22,7 @@ public class RetrieveProducts {
     private ShopifyUtility shopifyUtility;
 
     // TODO: return a response entity
-    public ShopifyStoreInventoryVO retrieveProducts(String siteUrl) {
+    public ResponseEntity<ShopifyStoreInventoryVO> retrieveProducts(String siteUrl) {
         ResponseEntity<ShopifyStoreInventoryVO> storeInventory = null;
         ResponseEntity<ShopifyStoreInventoryVO> additionalPages = null;
         int i = 0;
@@ -32,7 +32,7 @@ public class RetrieveProducts {
             if (i == 1) {   // first page
                 storeInventory = productsFeignClient.getProducts(250, i);
                 if (storeInventory.getStatusCode().equals(HttpStatus.FORBIDDEN)) {
-                    //discordService.sendPasswordPageNotification();
+                    return new ResponseEntity<>(HttpStatus.FORBIDDEN);
                 }
             } else {
                 additionalPages = productsFeignClient.getProducts(250, i);
@@ -47,6 +47,6 @@ public class RetrieveProducts {
 
         log.debug("Products size: {}", storeInventory.getBody().getProducts().size());
 
-        return storeInventory.getBody();
+        return storeInventory;
     }
 }

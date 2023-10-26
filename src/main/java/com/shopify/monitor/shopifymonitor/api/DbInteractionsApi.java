@@ -36,7 +36,7 @@ public class DbInteractionsApi {
     @GetMapping(value = "/products")
     public ResponseEntity<ShopifyStoreInventoryVO> getAllProducts(@RequestParam String siteName) {
         siteName = "https://" + siteName + ".com";
-        ShopifyStoreInventoryVO products = retrieveProducts.retrieveProducts(siteName);
+        ShopifyStoreInventoryVO products = retrieveProducts.retrieveProducts(siteName).getBody();
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 

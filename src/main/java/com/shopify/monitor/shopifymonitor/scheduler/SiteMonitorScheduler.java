@@ -14,6 +14,8 @@ import com.shopify.monitor.shopifymonitor.utility.ShopifyUtility;
 import com.shopify.monitor.shopifymonitor.utility.SiteUrls;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
@@ -55,8 +57,13 @@ public class SiteMonitorScheduler {
         stopWatch.start();
         String siteUrl = String.valueOf(siteUrls.getUrls().get(0));
         String siteName = shopifyUtility.stripSiteName(siteUrl);
-        // TODO: catch response entity and handle 403 forbidden (aka password page)
-        ShopifyStoreInventoryVO storeInventory = retrieveProducts.retrieveProducts(siteUrl);
+        ResponseEntity<ShopifyStoreInventoryVO> storeInventoryEntity = retrieveProducts.retrieveProducts(siteUrl);
+
+        if (storeInventoryEntity.getStatusCode().equals(HttpStatus.FORBIDDEN)) {
+            // TODO: send discord notification
+            return;
+        }
+        ShopifyStoreInventoryVO storeInventory = storeInventoryEntity.getBody();
         long count = productRepository.count();
         log.info("Count {} First Run: {}", count, isFirstRun);
 
