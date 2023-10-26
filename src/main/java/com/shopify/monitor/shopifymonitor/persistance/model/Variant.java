@@ -1,6 +1,5 @@
 package com.shopify.monitor.shopifymonitor.persistance.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.ToString;
 import org.springframework.data.annotation.Id;
@@ -14,19 +13,11 @@ public class Variant {
     private String id;
     private String title;
     private String sku;
-    @JsonProperty("requires_shipping")
-    private Boolean requiresShipping;
-    private Boolean taxable;
     private Boolean available;
     private String price;
-    private Long grams;
-    @JsonProperty("compare_at_price")
     private String compareAtPrice;
     private Long position;
-    @JsonProperty("product_id")
     private String productId;
-    @JsonProperty("created_at")
     private String createdAt;
-    @JsonProperty("updated_at")
     private String updatedAt;
 }
