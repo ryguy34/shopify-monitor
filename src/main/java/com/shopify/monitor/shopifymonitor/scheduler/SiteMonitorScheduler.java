@@ -53,9 +53,24 @@ public class SiteMonitorScheduler {
 
     @Scheduled(fixedDelay = 60000)
     public void monitorSite() {
+        List<Object> siteList = siteUrls.getUrls();
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        String siteUrl = String.valueOf(siteUrls.getUrls().get(0));
+
+        for (Object siteUrl : siteList) {
+            monitorSiteHelper(String.valueOf(siteUrl), isFirstRun);
+        }
+
+        isFirstRun = false;
+        stopWatch.stop();
+        log.info("Done updating sites in {}s", stopWatch.getTotalTimeSeconds());
+    }
+
+    public void monitorSiteHelper(String siteUrl, boolean isFirstRun) {
+        // It is running the other site as if they are new products
+        log.info("Site: {}", siteUrl);
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
         String siteName = shopifyUtility.stripSiteName(siteUrl);
         ResponseEntity<ShopifyStoreInventoryVO> storeInventoryEntity = retrieveProducts.retrieveProducts(siteUrl);
 
@@ -65,13 +80,11 @@ public class SiteMonitorScheduler {
         }
         ShopifyStoreInventoryVO storeInventory = storeInventoryEntity.getBody();
         long count = productRepository.count();
-        log.info("Count {} First Run: {}", count, isFirstRun);
+        log.info("Count {}", count);
 
-        if (count == 0 || isFirstRun) {
+        if (isFirstRun) {
             // save all products and variants
             List<VariantVO> variantVOList = new ArrayList<>();
-            log.debug("Site: {}", siteName);
-
             List<Product> products = shopifyProductMapper.map(storeInventory.getProducts(), siteName);
             log.debug("Mapped db products: {}", products);
 
@@ -86,7 +99,7 @@ public class SiteMonitorScheduler {
             productRepository.saveAll(products);
             variantRepository.saveAll(variants);
 
-            isFirstRun = false;
+            //isFirstRun = false;
         } else {
             // get store inventory variants and get all db variants for that store
             for (ProductVO p : storeInventory.getProducts()) {
@@ -114,8 +127,7 @@ public class SiteMonitorScheduler {
         }
 
         stopWatch.stop();
-        log.info("Processing time: {} seconds", stopWatch.getTotalTimeSeconds());
-        log.info("Monitor done");
+        log.info("Processing time: {} seconds for {}", stopWatch.getTotalTimeSeconds(), siteName);
     }
 
     private void updateDbAndSendNotification(List<VariantVO> currentStoreVariants, List<Variant> savedProductVariants) {

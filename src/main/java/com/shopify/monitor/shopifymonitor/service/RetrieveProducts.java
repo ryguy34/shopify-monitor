@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
 import java.util.Objects;
 
 @Service
@@ -21,7 +22,6 @@ public class RetrieveProducts {
     @Autowired
     private ShopifyUtility shopifyUtility;
 
-    // TODO: return a response entity
     public ResponseEntity<ShopifyStoreInventoryVO> retrieveProducts(String siteUrl) {
         ResponseEntity<ShopifyStoreInventoryVO> storeInventory = null;
         ResponseEntity<ShopifyStoreInventoryVO> additionalPages = null;
@@ -30,14 +30,13 @@ public class RetrieveProducts {
         do {
             i++;
             if (i == 1) {   // first page
-                storeInventory = productsFeignClient.getProducts(250, i);
+                storeInventory = productsFeignClient.getProducts(URI.create(siteUrl), 250, i);
                 if (storeInventory.getStatusCode().equals(HttpStatus.FORBIDDEN)) {
                     return new ResponseEntity<>(HttpStatus.FORBIDDEN);
                 }
             } else {
-                additionalPages = productsFeignClient.getProducts(250, i);
-                Objects.requireNonNull(storeInventory.getBody()).getProducts()
-                        .addAll(Objects.requireNonNull(additionalPages.getBody()).getProducts());
+                additionalPages = productsFeignClient.getProducts(URI.create(siteUrl), 250, i);
+                Objects.requireNonNull(storeInventory.getBody()).getProducts().addAll(Objects.requireNonNull(additionalPages.getBody()).getProducts());
             }
         } while (i == 1 || !additionalPages.getBody().getProducts().isEmpty());
 
