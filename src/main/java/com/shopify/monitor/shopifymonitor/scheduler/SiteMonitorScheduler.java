@@ -67,7 +67,6 @@ public class SiteMonitorScheduler {
     }
 
     public void monitorSiteHelper(String siteUrl, boolean isFirstRun) {
-        // TODO: need to refactor this method and extract some of the logic to the above method
         // It is running the other site as if they are new products
         log.info("Site: {}", siteUrl);
         StopWatch stopWatch = new StopWatch();
@@ -86,8 +85,6 @@ public class SiteMonitorScheduler {
         if (isFirstRun) {
             // save all products and variants
             List<VariantVO> variantVOList = new ArrayList<>();
-            log.debug("Site: {}", siteName);
-
             List<Product> products = shopifyProductMapper.map(storeInventory.getProducts(), siteName);
             log.debug("Mapped db products: {}", products);
 
@@ -102,7 +99,7 @@ public class SiteMonitorScheduler {
             productRepository.saveAll(products);
             variantRepository.saveAll(variants);
 
-            isFirstRun = false;
+            //isFirstRun = false;
         } else {
             // get store inventory variants and get all db variants for that store
             for (ProductVO p : storeInventory.getProducts()) {
@@ -130,7 +127,7 @@ public class SiteMonitorScheduler {
         }
 
         stopWatch.stop();
-        log.info("Processing time: {} seconds", stopWatch.getTotalTimeSeconds());
+        log.info("Processing time: {} seconds for {}", stopWatch.getTotalTimeSeconds(), siteName);
     }
 
     private void updateDbAndSendNotification(List<VariantVO> currentStoreVariants, List<Variant> savedProductVariants) {
