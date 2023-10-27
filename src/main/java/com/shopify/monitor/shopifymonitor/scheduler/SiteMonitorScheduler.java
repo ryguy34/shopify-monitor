@@ -98,8 +98,6 @@ public class SiteMonitorScheduler {
 
             productRepository.saveAll(products);
             variantRepository.saveAll(variants);
-
-            //isFirstRun = false;
         } else {
             // get store inventory variants and get all db variants for that store
             for (ProductVO p : storeInventory.getProducts()) {

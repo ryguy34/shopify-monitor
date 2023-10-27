@@ -1,7 +1,7 @@
 spring:
     data:
         mongodb:
-            uri: ${MONGO_URI}
+            uri: mongodb+srv://${USERNAME}:${PASSWORD}@shopify-monitor-cluster.qhcpxbr.mongodb.net/
             database: ${DB}
 
 logging:
@@ -11,4 +11,4 @@ logging:
 site:
     urls:
         - https://undefeated.com
-        - https://atmosusa.com
+        #- https://atmosusa.com
