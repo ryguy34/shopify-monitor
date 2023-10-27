@@ -16,6 +16,7 @@ shopify:
 site:
     urls:
         - https://undefeated.com
+        - https://www.atmosusa.com
 
 #shopify:
 #    undefeated:

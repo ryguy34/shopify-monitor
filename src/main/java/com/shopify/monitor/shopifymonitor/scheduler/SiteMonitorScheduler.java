@@ -53,9 +53,24 @@ public class SiteMonitorScheduler {
 
     @Scheduled(fixedDelay = 60000)
     public void monitorSite() {
+        List<Object> siteList = siteUrls.getUrls();
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        String siteUrl = String.valueOf(siteUrls.getUrls().get(0));
+
+        for (Object siteUrl : siteList) {
+            log.info("Site: {}", siteUrl);
+            monitorSiteHelper(String.valueOf(siteUrl));
+        }
+
+        stopWatch.stop();
+        log.info("Done updating sites in {}s", stopWatch.getTotalTimeSeconds());
+    }
+
+    public void monitorSiteHelper(String siteUrl) {
+        // TODO: need to refactor this method and extract some of the logic to the above method
+        // It is running the other site as if they are new products
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
         String siteName = shopifyUtility.stripSiteName(siteUrl);
         ResponseEntity<ShopifyStoreInventoryVO> storeInventoryEntity = retrieveProducts.retrieveProducts(siteUrl);
 
@@ -65,9 +80,9 @@ public class SiteMonitorScheduler {
         }
         ShopifyStoreInventoryVO storeInventory = storeInventoryEntity.getBody();
         long count = productRepository.count();
-        log.info("Count {} First Run: {}", count, isFirstRun);
+        log.info("Count {}", count);
 
-        if (count == 0 || isFirstRun) {
+        if (isFirstRun) {
             // save all products and variants
             List<VariantVO> variantVOList = new ArrayList<>();
             log.debug("Site: {}", siteName);
