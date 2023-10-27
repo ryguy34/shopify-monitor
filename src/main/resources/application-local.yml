@@ -8,20 +8,7 @@ logging:
     level:
         com.shopify.monitor.shopifymonitor: INFO
 
-
-shopify:
-    site-url:
-        undefeated: "https://undefeated.com"
-
 site:
     urls:
         - https://undefeated.com
         - https://www.atmosusa.com
-
-#shopify:
-#    undefeated:
-#        url: "https://undefeated.com"
-#    kith:
-#        url: "https://kith.com"
-#    supreme:
-#        url: "https://us.supreme.com"
