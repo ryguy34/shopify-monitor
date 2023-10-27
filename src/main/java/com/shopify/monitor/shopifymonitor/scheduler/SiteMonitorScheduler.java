@@ -58,17 +58,18 @@ public class SiteMonitorScheduler {
         stopWatch.start();
 
         for (Object siteUrl : siteList) {
-            log.info("Site: {}", siteUrl);
-            monitorSiteHelper(String.valueOf(siteUrl));
+            monitorSiteHelper(String.valueOf(siteUrl), isFirstRun);
         }
 
+        isFirstRun = false;
         stopWatch.stop();
         log.info("Done updating sites in {}s", stopWatch.getTotalTimeSeconds());
     }
 
-    public void monitorSiteHelper(String siteUrl) {
+    public void monitorSiteHelper(String siteUrl, boolean isFirstRun) {
         // TODO: need to refactor this method and extract some of the logic to the above method
         // It is running the other site as if they are new products
+        log.info("Site: {}", siteUrl);
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
         String siteName = shopifyUtility.stripSiteName(siteUrl);
@@ -130,7 +131,6 @@ public class SiteMonitorScheduler {
 
         stopWatch.stop();
         log.info("Processing time: {} seconds", stopWatch.getTotalTimeSeconds());
-        log.info("Monitor done");
     }
 
     private void updateDbAndSendNotification(List<VariantVO> currentStoreVariants, List<Variant> savedProductVariants) {
