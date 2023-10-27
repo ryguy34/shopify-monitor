@@ -10,7 +10,7 @@ import java.net.URI;
 
 // TODO: fix this so the url can be passed in
 @FeignClient(value = "shopifyclient", url = "https://this-is-a-placeholder.com")
-public interface ShopifyProductsFeignClient {
+public interface ShopifyProductsClient {
 
     @GetMapping(value = "/products.json")
     ResponseEntity<ShopifyStoreInventoryVO> getProducts(URI baseUrl, @RequestParam(value = "limit") int limit, @RequestParam(value = "page") int page);
