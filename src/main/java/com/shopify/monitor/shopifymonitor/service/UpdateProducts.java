@@ -21,6 +21,7 @@ import org.springframework.util.StopWatch;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service
@@ -45,7 +46,7 @@ public class UpdateProducts {
     private ShopifyUtility shopifyUtility;
 
     @Async
-    public void updateProducts(String siteUrl, boolean isFirstRun) {
+    public CompletableFuture<Void> updateProducts(String siteUrl, boolean isFirstRun) {
         log.info("Site: {}", siteUrl);
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
@@ -54,7 +55,7 @@ public class UpdateProducts {
 
         if (storeInventoryEntity.getStatusCode().equals(HttpStatus.FORBIDDEN)) {
             // TODO: send discord notification
-            return;
+            return CompletableFuture.completedFuture(null);
         }
         ShopifyStoreInventoryVO storeInventory = storeInventoryEntity.getBody();
         long count = productRepository.count();
@@ -104,6 +105,7 @@ public class UpdateProducts {
 
         stopWatch.stop();
         log.info("Processing time: {} seconds for {}", stopWatch.getTotalTimeSeconds(), siteName);
+        return CompletableFuture.completedFuture(null);
     }
 
     private void updateDbAndSendNotification(List<VariantVO> currentStoreVariants, List<Variant> savedProductVariants) {

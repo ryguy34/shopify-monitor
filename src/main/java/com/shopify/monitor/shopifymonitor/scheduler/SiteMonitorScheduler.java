@@ -8,7 +8,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Component
@@ -25,12 +27,16 @@ public class SiteMonitorScheduler {
     @Scheduled(fixedDelay = 60000)
     public void monitorSite() {
         List<Object> siteList = siteUrls.getUrls();
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
 
         for (Object siteUrl : siteList) {
-            updateProducts.updateProducts(String.valueOf(siteUrl), isFirstRun);
+            final CompletableFuture<Void> completableFuture = updateProducts.updateProducts(String.valueOf(siteUrl), isFirstRun);
+            futures.add(completableFuture);
         }
+
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
 
         isFirstRun = false;
         stopWatch.stop();
