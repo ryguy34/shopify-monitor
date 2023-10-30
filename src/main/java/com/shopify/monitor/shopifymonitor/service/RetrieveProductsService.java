@@ -1,7 +1,7 @@
 package com.shopify.monitor.shopifymonitor.service;
 
 import com.shopify.monitor.shopifymonitor.api.vo.ShopifyStoreInventoryVO;
-import com.shopify.monitor.shopifymonitor.feignclient.ShopifyProductsFeignClient;
+import com.shopify.monitor.shopifymonitor.feignclient.ShopifyProductsClient;
 import com.shopify.monitor.shopifymonitor.utility.ShopifyUtility;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +14,10 @@ import java.util.Objects;
 
 @Service
 @Slf4j
-public class RetrieveProducts {
+public class RetrieveProductsService {
 
     @Autowired
-    private ShopifyProductsFeignClient productsFeignClient;
+    private ShopifyProductsClient shopifyProductsClient;
 
     @Autowired
     private ShopifyUtility shopifyUtility;
@@ -30,12 +30,12 @@ public class RetrieveProducts {
         do {
             i++;
             if (i == 1) {   // first page
-                storeInventory = productsFeignClient.getProducts(URI.create(siteUrl), 250, i);
+                storeInventory = shopifyProductsClient.getProducts(URI.create(siteUrl), 250, i);
                 if (storeInventory.getStatusCode().equals(HttpStatus.FORBIDDEN)) {
                     return new ResponseEntity<>(HttpStatus.FORBIDDEN);
                 }
             } else {
-                additionalPages = productsFeignClient.getProducts(URI.create(siteUrl), 250, i);
+                additionalPages = shopifyProductsClient.getProducts(URI.create(siteUrl), 250, i);
                 Objects.requireNonNull(storeInventory.getBody()).getProducts().addAll(Objects.requireNonNull(additionalPages.getBody()).getProducts());
             }
         } while (i == 1 || !additionalPages.getBody().getProducts().isEmpty());

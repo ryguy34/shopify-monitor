@@ -6,9 +6,10 @@ import com.shopify.monitor.shopifymonitor.persistance.model.Variant;
 import com.shopify.monitor.shopifymonitor.persistance.repository.ProductRepository;
 import com.shopify.monitor.shopifymonitor.persistance.repository.VariantRepository;
 import com.shopify.monitor.shopifymonitor.scheduler.SiteMonitorScheduler;
-import com.shopify.monitor.shopifymonitor.service.RetrieveProducts;
+import com.shopify.monitor.shopifymonitor.service.RetrieveProductsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,12 +18,13 @@ import java.util.List;
 import java.util.Optional;
 
 @Slf4j
+@Profile("local")
 @RestController
 @RequestMapping(value = "/shopify/notification")
 public class DbInteractionsApi {
 
     @Autowired
-    private RetrieveProducts retrieveProducts;
+    private RetrieveProductsService retrieveProductsService;
 
     @Autowired
     private SiteMonitorScheduler siteMonitorScheduler;
@@ -36,7 +38,7 @@ public class DbInteractionsApi {
     @GetMapping(value = "/products")
     public ResponseEntity<ShopifyStoreInventoryVO> getAllProducts(@RequestParam String siteName) {
         siteName = "https://" + siteName + ".com";
-        ShopifyStoreInventoryVO products = retrieveProducts.retrieveProducts(siteName).getBody();
+        ShopifyStoreInventoryVO products = retrieveProductsService.retrieveProducts(siteName).getBody();
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 

@@ -13,28 +13,40 @@ public class ShopifyUtility {
     }
 
     public Variant cleanVariantData(Variant variant) {
-        String variantTitle = variant.getTitle();
-        variantTitle = variantTitle.replaceAll("[^a-zA-Z0-9.]", "");
-        variant.setTitle(variantTitle);
+        if (variant.getTitle() != null) {
+            String cleanedTitle = cleanTitle(variant.getTitle());
+            variant.setTitle(cleanedTitle);
+        }
 
-        String variantSku = variant.getSku();
-        variantSku = variantSku.replace("---.*", "");
-        variant.setSku(variantSku);
+        if (variant.getSku() != null) {
+            String cleanedSku = cleanSku(variant.getSku());
+            variant.setSku(cleanedSku);
+        }
 
         return variant;
     }
 
     public List<Variant> cleanVariantData(List<Variant> variants) {
         for (Variant variant : variants) {
-            String variantTitle = variant.getTitle();
-            variantTitle = variantTitle.replaceAll("[^a-zA-Z0-9.]", "");
-            variant.setTitle(variantTitle);
+            if (variant.getTitle() != null) {
+                String cleanedTitle = cleanTitle(variant.getTitle());
+                variant.setTitle(cleanedTitle);
+            }
 
-            String variantSku = variant.getSku();
-            String cleanedSku = variantSku.replaceAll("---.*", "");
-            variant.setSku(cleanedSku);
+            if (variant.getSku() != null) {
+                String cleanedSku = cleanSku(variant.getSku());
+                variant.setSku(cleanedSku);
+            }
         }
 
         return variants;
+    }
+
+    private String cleanSku(String sku) {
+        return sku.replaceAll("---.*", "");
+    }
+
+    private String cleanTitle(String title) {
+        return title.replaceAll("[^a-zA-Z0-9.]", "");
     }
 }
