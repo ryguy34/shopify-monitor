@@ -20,7 +20,6 @@ import org.springframework.util.StopWatch;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
@@ -45,6 +44,9 @@ public class UpdateProducts {
     @Autowired
     private ShopifyUtility shopifyUtility;
 
+    @Autowired
+    private UpdateVariants updateVariants;
+
     @Async
     public CompletableFuture<Void> updateProducts(String siteUrl, boolean isFirstRun) {
         log.info("Site: {}", siteUrl);
@@ -52,6 +54,7 @@ public class UpdateProducts {
         stopWatch.start();
         String siteName = shopifyUtility.stripSiteName(siteUrl);
         ResponseEntity<ShopifyStoreInventoryVO> storeInventoryEntity = retrieveProducts.retrieveProducts(siteUrl);
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
 
         if (storeInventoryEntity.getStatusCode().equals(HttpStatus.FORBIDDEN)) {
             // TODO: send discord notification
@@ -78,58 +81,16 @@ public class UpdateProducts {
             productRepository.saveAll(products);
             variantRepository.saveAll(variants);
         } else {
-            // get store inventory variants and get all db variants for that store
             for (ProductVO p : storeInventory.getProducts()) {
-                String productId = p.getId();
-
-                Optional<Product> product = productRepository.findById(productId);
-                if (product.isEmpty()) {
-                    // is the product completely new
-                    log.info("*** New product found: {} ***", p.getTitle());
-                    Product mappedProduct = shopifyProductMapper.mapProduct(p, siteName);
-                    productRepository.save(mappedProduct);
-
-                    List<Variant> newProductVariants = shopifyVariantMapper.map(p.getVariants());
-                    newProductVariants = shopifyUtility.cleanVariantData(newProductVariants);
-                    variantRepository.saveAll(newProductVariants);
-
-                    // TODO: send discord notification
-                } else {
-                    List<VariantVO> currentStoreVariants = p.getVariants();
-                    List<Variant> savedProductVariants = variantRepository.findAllByProductId(productId);
-
-                    updateDbAndSendNotification(currentStoreVariants, savedProductVariants);
-                }
+                CompletableFuture<Void> future = updateVariants.updateVariants(p, siteName);
+                futures.add(future);
             }
+
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
         }
 
         stopWatch.stop();
         log.info("Processing time: {} seconds for {}", stopWatch.getTotalTimeSeconds(), siteName);
         return CompletableFuture.completedFuture(null);
-    }
-
-    private void updateDbAndSendNotification(List<VariantVO> currentStoreVariants, List<Variant> savedProductVariants) {
-        for (final VariantVO currentStoreVariant : currentStoreVariants) {
-            for (Variant savedVariant : savedProductVariants) {
-                if (currentStoreVariant.getId().equals(savedVariant.getId())) {
-                    if (Boolean.TRUE.equals(currentStoreVariant.getAvailable()) && Boolean.FALSE.equals(savedVariant.getAvailable())) {
-                        // restocked
-                        log.info("*** Restocked item: {} ***", savedVariant.getTitle());
-                        savedVariant.setAvailable(true);
-                        savedVariant.setUpdatedAt(currentStoreVariant.getUpdatedAt());
-                        savedVariant = shopifyUtility.cleanVariantData(savedVariant);
-                        variantRepository.save(savedVariant);
-
-                        // TODO: send discord notification
-                    } else if (Boolean.FALSE.equals(currentStoreVariant.getAvailable()) && Boolean.TRUE.equals(savedVariant.getAvailable())) {
-                        // out of stock
-                        log.info("*** OOS: {} ***", savedVariant.getTitle());
-                        savedVariant.setAvailable(false);
-                        savedVariant.setUpdatedAt(currentStoreVariant.getUpdatedAt());
-                        variantRepository.save(savedVariant);
-                    }
-                }
-            }
-        }
     }
 }
