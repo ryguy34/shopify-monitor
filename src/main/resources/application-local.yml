@@ -11,4 +11,5 @@ logging:
 site:
     urls:
         - https://undefeated.com
-        - https://atmosusa.com
+#        - https://atmosusa.com
+#        - https://kith.com
