@@ -14,7 +14,7 @@ import java.util.Objects;
 
 @Service
 @Slf4j
-public class RetrieveProducts {
+public class RetrieveProductsService {
 
     @Autowired
     private ShopifyProductsClient shopifyProductsClient;

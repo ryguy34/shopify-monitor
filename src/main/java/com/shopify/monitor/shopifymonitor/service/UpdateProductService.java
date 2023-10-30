@@ -24,10 +24,10 @@ import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service
-public class UpdateProducts {
+public class UpdateProductService {
 
     @Autowired
-    private RetrieveProducts retrieveProducts;
+    private RetrieveProductsService retrieveProductsService;
 
     @Autowired
     private ShopifyProductMapper shopifyProductMapper;
@@ -45,7 +45,7 @@ public class UpdateProducts {
     private ShopifyUtility shopifyUtility;
 
     @Autowired
-    private UpdateVariants updateVariants;
+    private UpdateVariantService updateVariantService;
 
     @Async
     public CompletableFuture<Void> updateProducts(String siteUrl, boolean isFirstRun) {
@@ -53,7 +53,7 @@ public class UpdateProducts {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
         String siteName = shopifyUtility.stripSiteName(siteUrl);
-        ResponseEntity<ShopifyStoreInventoryVO> storeInventoryEntity = retrieveProducts.retrieveProducts(siteUrl);
+        ResponseEntity<ShopifyStoreInventoryVO> storeInventoryEntity = retrieveProductsService.retrieveProducts(siteUrl);
         List<CompletableFuture<Void>> futures = new ArrayList<>();
 
         if (storeInventoryEntity.getStatusCode().equals(HttpStatus.FORBIDDEN)) {
@@ -82,7 +82,7 @@ public class UpdateProducts {
             variantRepository.saveAll(variants);
         } else {
             for (ProductVO p : storeInventory.getProducts()) {
-                CompletableFuture<Void> future = updateVariants.updateVariants(p, siteName);
+                CompletableFuture<Void> future = updateVariantService.updateVariants(p, siteName);
                 futures.add(future);
             }
 

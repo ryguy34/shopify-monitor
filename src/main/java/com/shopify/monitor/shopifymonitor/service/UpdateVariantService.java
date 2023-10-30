@@ -20,7 +20,7 @@ import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service
-public class UpdateVariants {
+public class UpdateVariantService {
 
     @Autowired
     private VariantRepository variantRepository;
@@ -39,7 +39,6 @@ public class UpdateVariants {
 
     @Async
     public CompletableFuture<Void> updateVariants(ProductVO p, String siteName) {
-        // TODO: clean up method
         String productId = p.getId();
 
         Optional<Product> product = productRepository.findById(productId);
@@ -58,30 +57,42 @@ public class UpdateVariants {
             List<VariantVO> currentStoreVariants = p.getVariants();
             List<Variant> savedProductVariants = variantRepository.findAllByProductId(productId);
 
-            for (final VariantVO currentStoreVariant : currentStoreVariants) {
-                for (Variant savedVariant : savedProductVariants) {
-                    if (currentStoreVariant.getId().equals(savedVariant.getId())) {
-                        if (Boolean.TRUE.equals(currentStoreVariant.getAvailable()) && Boolean.FALSE.equals(savedVariant.getAvailable())) {
-                            // restocked
-                            log.info("*** Restocked item -> title: {} productId: {} ***", savedVariant.getTitle(), productId);
-                            savedVariant.setAvailable(true);
-                            savedVariant.setUpdatedAt(currentStoreVariant.getUpdatedAt());
-                            savedVariant = shopifyUtility.cleanVariantData(savedVariant);
-                            variantRepository.save(savedVariant);
+            updateVariantHelper(productId, currentStoreVariants, savedProductVariants);
+        }
 
-                            // TODO: send discord notification
-                        } else if (Boolean.FALSE.equals(currentStoreVariant.getAvailable()) && Boolean.TRUE.equals(savedVariant.getAvailable())) {
-                            // out of stock
-                            log.info("*** OOS -> title: {} productId: {} ***", savedVariant.getTitle(), productId);
-                            savedVariant.setAvailable(false);
-                            savedVariant.setUpdatedAt(currentStoreVariant.getUpdatedAt());
-                            variantRepository.save(savedVariant);
-                        }
+        return CompletableFuture.completedFuture(null);
+    }
+
+    private void updateVariantHelper(String productId, List<VariantVO> currentStoreVariants, List<Variant> savedProductVariants) {
+        for (final VariantVO currentStoreVariant : currentStoreVariants) {
+            for (Variant savedVariant : savedProductVariants) {
+                if (currentStoreVariant.getId().equals(savedVariant.getId())) {
+                    if (isRestocked(currentStoreVariant, savedVariant)) {
+                        // restocked
+                        log.info("*** Restocked item -> title: {} productId: {} ***", savedVariant.getTitle(), productId);
+                        savedVariant.setAvailable(true);
+                        savedVariant.setUpdatedAt(currentStoreVariant.getUpdatedAt());
+                        savedVariant = shopifyUtility.cleanVariantData(savedVariant);
+                        variantRepository.save(savedVariant);
+
+                        // TODO: send discord notification
+                    } else if (isOutOfStock(currentStoreVariant, savedVariant)) {
+                        // out of stock
+                        log.info("*** OOS -> title: {} productId: {} ***", savedVariant.getTitle(), productId);
+                        savedVariant.setAvailable(false);
+                        savedVariant.setUpdatedAt(currentStoreVariant.getUpdatedAt());
+                        variantRepository.save(savedVariant);
                     }
                 }
             }
         }
+    }
 
-        return CompletableFuture.completedFuture(null);
+    private boolean isRestocked(VariantVO currentStoreVariant, Variant savedVariant) {
+        return Boolean.TRUE.equals(currentStoreVariant.getAvailable()) && Boolean.FALSE.equals(savedVariant.getAvailable());
+    }
+
+    private boolean isOutOfStock(VariantVO currentStoreVariant, Variant savedVariant) {
+        return Boolean.FALSE.equals(currentStoreVariant.getAvailable()) && Boolean.TRUE.equals(savedVariant.getAvailable());
     }
 }

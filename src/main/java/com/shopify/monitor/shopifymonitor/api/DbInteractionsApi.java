@@ -6,7 +6,7 @@ import com.shopify.monitor.shopifymonitor.persistance.model.Variant;
 import com.shopify.monitor.shopifymonitor.persistance.repository.ProductRepository;
 import com.shopify.monitor.shopifymonitor.persistance.repository.VariantRepository;
 import com.shopify.monitor.shopifymonitor.scheduler.SiteMonitorScheduler;
-import com.shopify.monitor.shopifymonitor.service.RetrieveProducts;
+import com.shopify.monitor.shopifymonitor.service.RetrieveProductsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,7 +22,7 @@ import java.util.Optional;
 public class DbInteractionsApi {
 
     @Autowired
-    private RetrieveProducts retrieveProducts;
+    private RetrieveProductsService retrieveProductsService;
 
     @Autowired
     private SiteMonitorScheduler siteMonitorScheduler;
@@ -36,7 +36,7 @@ public class DbInteractionsApi {
     @GetMapping(value = "/products")
     public ResponseEntity<ShopifyStoreInventoryVO> getAllProducts(@RequestParam String siteName) {
         siteName = "https://" + siteName + ".com";
-        ShopifyStoreInventoryVO products = retrieveProducts.retrieveProducts(siteName).getBody();
+        ShopifyStoreInventoryVO products = retrieveProductsService.retrieveProducts(siteName).getBody();
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 

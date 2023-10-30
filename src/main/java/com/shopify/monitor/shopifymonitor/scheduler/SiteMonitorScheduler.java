@@ -1,6 +1,6 @@
 package com.shopify.monitor.shopifymonitor.scheduler;
 
-import com.shopify.monitor.shopifymonitor.service.UpdateProducts;
+import com.shopify.monitor.shopifymonitor.service.UpdateProductService;
 import com.shopify.monitor.shopifymonitor.utility.SiteUrls;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +20,7 @@ public class SiteMonitorScheduler {
     private SiteUrls siteUrls;
 
     @Autowired
-    private UpdateProducts updateProducts;
+    private UpdateProductService updateProductService;
 
     private boolean isFirstRun = true;
 
@@ -32,7 +32,7 @@ public class SiteMonitorScheduler {
         stopWatch.start();
 
         for (Object siteUrl : siteList) {
-            final CompletableFuture<Void> completableFuture = updateProducts.updateProducts(String.valueOf(siteUrl), isFirstRun);
+            final CompletableFuture<Void> completableFuture = updateProductService.updateProducts(String.valueOf(siteUrl), isFirstRun);
             futures.add(completableFuture);
         }
 
