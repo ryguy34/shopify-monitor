@@ -37,7 +37,7 @@ public class UpdateVariantService {
     @Autowired
     private ShopifyVariantMapper shopifyVariantMapper;
 
-    @Async
+    @Async("variantTaskExecutor")
     public CompletableFuture<Void> updateVariants(ProductVO p, String siteName) {
         String productId = p.getId();
 
@@ -57,19 +57,19 @@ public class UpdateVariantService {
             List<VariantVO> currentStoreVariants = p.getVariants();
             List<Variant> savedProductVariants = variantRepository.findAllByProductId(productId);
 
-            updateVariantHelper(productId, currentStoreVariants, savedProductVariants);
+            updateVariantHelper(siteName, productId, currentStoreVariants, savedProductVariants);
         }
 
         return CompletableFuture.completedFuture(null);
     }
 
-    private void updateVariantHelper(String productId, List<VariantVO> currentStoreVariants, List<Variant> savedProductVariants) {
+    private void updateVariantHelper(String siteName, String productId, List<VariantVO> currentStoreVariants, List<Variant> savedProductVariants) {
         for (final VariantVO currentStoreVariant : currentStoreVariants) {
             for (Variant savedVariant : savedProductVariants) {
                 if (currentStoreVariant.getId().equals(savedVariant.getId())) {
                     if (isRestocked(currentStoreVariant, savedVariant)) {
                         // restocked
-                        log.info("*** Restocked item -> title: {} productId: {} ***", savedVariant.getTitle(), productId);
+                        log.info("*** Restocked item -> site: {} title: {} productId: {} ***", siteName, savedVariant.getTitle(), productId);
                         savedVariant.setAvailable(true);
                         savedVariant.setUpdatedAt(currentStoreVariant.getUpdatedAt());
                         savedVariant = shopifyUtility.cleanVariantData(savedVariant);
@@ -78,7 +78,7 @@ public class UpdateVariantService {
                         // TODO: send discord notification
                     } else if (isOutOfStock(currentStoreVariant, savedVariant)) {
                         // out of stock
-                        log.info("*** OOS -> title: {} productId: {} ***", savedVariant.getTitle(), productId);
+                        log.info("*** OOS -> site: {} title: {} productId: {} ***", siteName, savedVariant.getTitle(), productId);
                         savedVariant.setAvailable(false);
                         savedVariant.setUpdatedAt(currentStoreVariant.getUpdatedAt());
                         variantRepository.save(savedVariant);

@@ -47,7 +47,7 @@ public class UpdateProductService {
     @Autowired
     private UpdateVariantService updateVariantService;
 
-    @Async
+    @Async("shopifySiteTaskExecutor")
     public CompletableFuture<Void> updateProducts(String siteUrl, boolean isFirstRun) {
         log.info("Site: {}", siteUrl);
         StopWatch stopWatch = new StopWatch();
@@ -64,7 +64,7 @@ public class UpdateProductService {
         long count = productRepository.count();
         log.info("Count {}", count);
 
-        if (isFirstRun) {
+        if (isFirstRun || count == 0) {
             // save all products and variants
             List<VariantVO> variantVOList = new ArrayList<>();
             List<Product> products = shopifyProductMapper.map(storeInventory.getProducts(), siteName);
